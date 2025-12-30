@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 import * as SecureStore from 'expo-secure-store';
+import { AuthProvider , useMockAuth} from './AuthContext';
 
 //Cache the clerk JWT
 const tokenCache = {
@@ -37,7 +38,8 @@ const InitialLayout = () => {
     ...FontAwesome.font,
   });
   const router = useRouter();
-  const {isLoaded, isSignedIn} = useAuth();
+   const { isSignedIn } = useMockAuth();
+  // const {isLoaded, isSignedIn} = useAuth();
 
 
   useEffect(() => {
@@ -51,8 +53,14 @@ const InitialLayout = () => {
   }, [loaded]);
 
   useEffect(() => {
-    console.log('isSignedIn', isSignedIn);
-  }, [isSignedIn])
+    console.log('AuthContext isSignedIn:', isSignedIn);
+
+    // if (isSignedIn) {
+    //   router.replace('/(tabs)'); // or home/dashboard
+    // } else {
+    //   router.replace('/index');
+    // }
+  }, [isSignedIn]);
 
   if (!loaded) return null;
 
@@ -125,12 +133,14 @@ const RootLayoutNav = () => {
   console.log('ENV:', process.env);
   return (
 
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} tokenCache={tokenCache}>
+    // <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} tokenCache={tokenCache}>
+    <AuthProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style='light' />
       <InitialLayout />
     </GestureHandlerRootView>
-    </ClerkProvider>
+    {/* </ClerkProvider> */}
+    </AuthProvider>
   );
 }
 

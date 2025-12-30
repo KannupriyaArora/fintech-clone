@@ -5,9 +5,11 @@ import { Link, useLocalSearchParams } from 'expo-router'
 import { defaultStyles } from '@/constants/Styles';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
 import Colors from '@/constants/Colors';
+import { useMockAuth } from '../AuthContext';
 
 const CELL_COUNT = 6;
 const Page = () => {
+    const {signIn} = useMockAuth();
     const { phone, signin } = useLocalSearchParams<{ phone: string, signin: string }>();
     const decodedPhone = decodeURIComponent(phone as string);
     const [code, setCode] = useState('');
@@ -33,8 +35,9 @@ const Page = () => {
         }
     }, [code]);
 
-    const verifyMockOTP = () => {
+    const verifyMockOTP = async () => {
   if (code === MOCK_OTP) {
+    await signIn();
     Alert.alert('Success', 'OTP verified successfully !!');
     // Navigate to home/dashboard
     // router.replace('/(tabs)');

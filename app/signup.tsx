@@ -3,14 +3,14 @@ import React, { use } from 'react'
 import { defaultStyles } from '@/constants/Styles'
 import Colors from '@/constants/Colors'
 import { Link, useRouter } from 'expo-router'
-import { useSignUp } from '@clerk/clerk-expo'
+// import { useSignUp } from '@clerk/clerk-expo'
 
 const signup = () => {
   const [countryCode, setCountryCode] = React.useState('+91')
   const [phoneNumber, setPhoneNumber] = React.useState('')
   const keyboardVerticalOffset = Platform.OS === 'ios' ? 90 : 0
   const router = useRouter();
-  const {signUp} = useSignUp();
+  // const {signUp} = useSignUp();
   
   const onSignup = async() => {
     const fullPhoneNumber = `${countryCode}${phoneNumber}`;
