@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 
 type AuthContextType = {
   isSignedIn: boolean;
+  isLoaded: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -11,12 +12,14 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // Restore session on app start
     SecureStore.getItemAsync('mock_session').then(value => {
       if (value === 'true') {
         setIsSignedIn(true);
+        setIsLoaded(true);
       }
     });
   }, []);
@@ -32,7 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isSignedIn, signIn, signOut }}>
+    <AuthContext.Provider value={{ isSignedIn,isLoaded, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );

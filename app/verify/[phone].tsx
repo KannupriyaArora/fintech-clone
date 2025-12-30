@@ -1,11 +1,11 @@
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import React, { Fragment, useEffect, useState } from 'react'
-import { Link, useLocalSearchParams } from 'expo-router'
+import { Link, useLocalSearchParams, useRouter } from 'expo-router'
 // import { isClerkAPIResponseError, useSignIn, useSignUp } from '@clerk/clerk-expo';
 import { defaultStyles } from '@/constants/Styles';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from 'react-native-confirmation-code-field';
 import Colors from '@/constants/Colors';
-import { useMockAuth } from '../AuthContext';
+import { useMockAuth } from '../../AuthContext';
 
 const CELL_COUNT = 6;
 const Page = () => {
@@ -21,7 +21,7 @@ const Page = () => {
         value: code,
         setValue: setCode,
     })
-
+    const router = useRouter();
     const MOCK_OTP = '123456';
     useEffect(() => {
         if (code.length === 6) {
@@ -38,8 +38,14 @@ const Page = () => {
     const verifyMockOTP = async () => {
   if (code === MOCK_OTP) {
     await signIn();
-    Alert.alert('Success', 'OTP verified successfully !!');
-    // Navigate to home/dashboard
+ Alert.alert('Success', 'OTP verified successfully', [
+      {
+        text: 'OK',
+        onPress: () => {
+          router.replace('/(authenticated)/(tabs)/home');
+        },
+      },
+    ]);    // Navigate to home/dashboard
     // router.replace('/(tabs)');
   } else {
     Alert.alert('Invalid OTP', 'Please enter correct code');

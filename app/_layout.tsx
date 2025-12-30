@@ -1,7 +1,7 @@
 import Colors from '@/constants/Colors';
 import { Stack, useRouter, useSegments, Link } from 'expo-router';
 import React, { useEffect } from 'react';
-import { TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, View, ActivityIndicator, Text } from 'react-native';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
@@ -11,7 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 import * as SecureStore from 'expo-secure-store';
-import { AuthProvider , useMockAuth} from './AuthContext';
+import { AuthProvider , useMockAuth} from '../AuthContext';
 
 //Cache the clerk JWT
 const tokenCache = {
@@ -38,8 +38,9 @@ const InitialLayout = () => {
     ...FontAwesome.font,
   });
   const router = useRouter();
-   const { isSignedIn } = useMockAuth();
+   const { isSignedIn, isLoaded } = useMockAuth();
   // const {isLoaded, isSignedIn} = useAuth();
+  const segments= useSegments();
 
 
   useEffect(() => {
@@ -54,6 +55,14 @@ const InitialLayout = () => {
 
   useEffect(() => {
     console.log('AuthContext isSignedIn:', isSignedIn);
+    // const inAuthGroup = segments[0] === '(authenticated)';
+
+    // if(isSignedIn && !inAuthGroup){
+    //   router.replace('/(authenticated)/(tabs)/home');
+    // }
+    // else if(!isSignedIn){
+    //   router.replace('/index');
+    // }
 
     // if (isSignedIn) {
     //   router.replace('/(tabs)'); // or home/dashboard
@@ -62,9 +71,21 @@ const InitialLayout = () => {
     // }
   }, [isSignedIn]);
 
-  if (!loaded) return null;
+  useEffect(() => {
+  if (!isLoaded) return; // ⛔ critical
 
-  return <Stack>
+  const inAuthGroup = segments[0] === '(authenticated)';
+
+  if (isSignedIn && !inAuthGroup) {
+    router.replace('/(authenticated)/(tabs)/home');
+  } else if (!isSignedIn && inAuthGroup) {
+    router.replace('/');
+  }
+}, [isSignedIn, isLoaded]);
+
+  if (!loaded) return <Text>Loading...</Text>;
+
+   return <Stack>
     <Stack.Screen
       name="index"
       options={{ headerShown: false }}
@@ -120,6 +141,13 @@ const InitialLayout = () => {
           <Ionicons name="arrow-back" size={34} color={Colors.dark} />
         </TouchableOpacity>
         ),
+      }}
+    />
+
+    <Stack.Screen
+      name="(authenticated)/(tabs)"
+      options={{
+        headerShown: false
       }}
     />
 
