@@ -8,6 +8,28 @@ import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
+const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+import * as SecureStore from 'expo-secure-store';
+
+//Cache the clerk JWT
+const tokenCache = {
+  async getToken(key: string) {
+    try{
+      return SecureStore.getItemAsync(key);
+    }
+    catch(err) {
+      return null;
+    }
+  },
+  async saveToken(key: string, value: string) {
+    try {
+      return SecureStore.setItemAsync(key, value);
+    } catch (err) {
+      return;
+    }
+  },
+};
 
 const InitialLayout = () => {
   const [loaded, error] = useFonts({
@@ -15,6 +37,7 @@ const InitialLayout = () => {
     ...FontAwesome.font,
   });
   const router = useRouter();
+  const {isLoaded, isSignedIn} = useAuth();
 
 
   useEffect(() => {
@@ -26,6 +49,10 @@ const InitialLayout = () => {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  useEffect(() => {
+    console.log('isSignedIn', isSignedIn);
+  }, [isSignedIn])
 
   if (!loaded) return null;
 
@@ -72,7 +99,19 @@ const InitialLayout = () => {
       options={{
         title: 'Help',
         presentation: 'modal',
-
+      }}
+    />
+    <Stack.Screen
+      name="verify/[phone]"
+      options={{
+        title: '',
+        headerBackTitle: '',
+        headerShadowVisible: false,
+        headerStyle: { backgroundColor: Colors.background },
+        headerLeft: () => (<TouchableOpacity onPress={router.back}>
+          <Ionicons name="arrow-back" size={34} color={Colors.dark} />
+        </TouchableOpacity>
+        ),
       }}
     />
 
@@ -81,11 +120,17 @@ const InitialLayout = () => {
 
 
 const RootLayoutNav = () => {
+  console.log('CLERK KEY:', CLERK_PUBLISHABLE_KEY);
+
+  console.log('ENV:', process.env);
   return (
+
+    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} tokenCache={tokenCache}>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style='light' />
       <InitialLayout />
     </GestureHandlerRootView>
+    </ClerkProvider>
   );
 }
 

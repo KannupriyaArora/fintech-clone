@@ -1,15 +1,31 @@
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
-import React from 'react'
+import React, { use } from 'react'
 import { defaultStyles } from '@/constants/Styles'
 import Colors from '@/constants/Colors'
-import { Link } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
+import { useSignUp } from '@clerk/clerk-expo'
 
 const signup = () => {
-  const onSignup = async() => {}
-  const [countryCode, setCountryCode] = React.useState('+49')
+  const [countryCode, setCountryCode] = React.useState('+91')
   const [phoneNumber, setPhoneNumber] = React.useState('')
   const keyboardVerticalOffset = Platform.OS === 'ios' ? 90 : 0
-
+  const router = useRouter();
+  const {signUp} = useSignUp();
+  
+  const onSignup = async() => {
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+    const encodedPhoneNumber = encodeURIComponent(fullPhoneNumber);
+    // router.push({pathname: '/verify/[phone]', params: {phone: encodedPhoneNumber}})
+    try {
+      //clerk doesn't verify indian numbers
+      // await signUp!.create({
+      //   phoneNumber: fullPhoneNumber,
+      // })
+      router.push({pathname: '/verify/[phone]', params: {phone: encodedPhoneNumber}})
+    } catch (err) {
+      console.error('error signing up', err);
+    }
+  }
 
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior='padding' keyboardVerticalOffset={keyboardVerticalOffset}>
@@ -24,6 +40,7 @@ const signup = () => {
       placeholderTextColor={Colors.gray}
       keyboardType='numeric'
       value={countryCode}
+      onChangeText={setCountryCode}
       />
       <TextInput
       style={[styles.input, { flex: 1 }]}

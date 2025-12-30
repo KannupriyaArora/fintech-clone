@@ -1,8 +1,10 @@
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native'
 import React from 'react'
 import { defaultStyles } from '@/constants/Styles'
 import Colors from '@/constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+// import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo'
 
 enum SignInType {
   Phone,
@@ -13,9 +15,45 @@ enum SignInType {
 
 
 const login = () => {
-  const onSignIn = async (type: SignInType) => {
+ 
+  const [countryCode, setCountryCode] = React.useState('+91')
+  const [phoneNumber, setPhoneNumber] = React.useState('')
+  const keyboardVerticalOffset = Platform.OS === 'ios' ? 90 : 0
+  const router = useRouter();
+  // const {signIn} = useSignIn();
+   const onSignIn = async (type: SignInType) => {
     if (type === SignInType.Phone) {
-      // Handle phone sign-in
+      if (!phoneNumber) {
+      Alert.alert('Error', 'Please enter phone number');
+      return;
+    }
+      // try{
+        const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+        const encodedPhoneNumber = encodeURIComponent(fullPhoneNumber);
+        //clerk not working for indian numbers
+        // const {supportedFirstFactors} = await signIn!.create({
+        //   identifier: fullPhoneNumber,
+        // });
+        // const firstPhoneFactor: any = supportedFirstFactors?.find((factor: any) => {
+        //   return factor.strategy === 'phone_code'
+        // });
+
+        // const {phoneNumberId} = firstPhoneFactor;
+        // await signIn!.prepareFirstFactor({
+        //   strategy: 'phone_code',
+        //   phoneNumberId,
+        // });
+
+        router.push({pathname: '/verify/[phone]', params: {phone: encodedPhoneNumber, signin: 'true'}})
+        
+      // } catch(error) {
+      //   console.log('error', JSON.stringify(error, null, 2));
+      //   if(isClerkAPIResponseError(error)) {
+      //     if(error.errors[0].code === 'form_identifier_not_found') {
+      //       Alert.alert('Error', error.errors[0].message);
+      //   }
+      // }
+      // }
     } else if (type === SignInType.Email) {
       // Handle email sign-in
     } else if (type === SignInType.Google) {
@@ -24,9 +62,6 @@ const login = () => {
       // Handle Apple sign-in
     }
   }
-  const [countryCode, setCountryCode] = React.useState('+49')
-  const [phoneNumber, setPhoneNumber] = React.useState('')
-  const keyboardVerticalOffset = Platform.OS === 'ios' ? 90 : 0
 
 
   return (
@@ -42,6 +77,7 @@ const login = () => {
             placeholderTextColor={Colors.gray}
             keyboardType='numeric'
             value={countryCode}
+            onChangeText={setCountryCode}
           />
           <TextInput
             style={[styles.input, { flex: 1 }]}

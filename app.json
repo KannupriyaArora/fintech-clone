@@ -34,7 +34,9 @@
     "plugins": [
       "expo-router",
       "expo-asset",
-      "expo-video"
+      "expo-video",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
